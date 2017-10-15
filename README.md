@@ -1,6 +1,8 @@
 # LT-Z17 Line Follower
 (https://oshwdem.org/)
 
+<img src="https://raw.githubusercontent.com/jbabio/LT-Z17-Line-Follower/master/LT-Z17.jpg" width="400">
+
 Line follower bot for the Line following contest at OSHWDem 2017
 
 ## Hardware Used:
