@@ -1,37 +1,62 @@
-void UpdatePIDParameters (){
-  bool updated = LOW;                             // Flag to show updated parameters only if something changed.
+void ReadSerialCommands (){
+  bool updated = LOW;                 // Flag to show updated parameters only if something changed.
   while (Serial.available() > 0) {
     switch (Serial.read()){
-      case '#':                                   // # -> Update all PID parameters. Syntax: #[int],[float],[float],[float]\n
-        maxSpeed = Serial.parseInt();             // Read new maxSpeed from serial.
-        Kp = Serial.parseFloat();                 // Read new Kp from serial.
-        Kd = Serial.parseFloat();                 // Read new Kd from serial.
-        Ki = Serial.parseFloat();                 // Read new Ki from serial.
-        updated = HIGH;                           // Something changed.
+      case '#':                       // # -> Update all PID parameters. Syntax: #[int],[float],[float],[float]\n
+        maxSpeed = Serial.parseInt(); // Read new maxSpeed from serial.
+        Kp = Serial.parseFloat();     // Read new Kp from serial.
+        Kd = Serial.parseFloat();     // Read new Kd from serial.
+        Ki = Serial.parseFloat();     // Read new Ki from serial.
+        updated = HIGH;               // Something changed.
         break;
-      case 'S':                                   // S -> Update maxSpeed parameter. Syntax: S[int]\n
-        maxSpeed = Serial.parseInt();             // Read new maxSpeed from serial.
-        updated = HIGH;                           // Something changed.
+      case 'S':                       // S -> Update maxSpeed parameter. Syntax: S[int]\n
+        maxSpeed = Serial.parseInt(); // Read new maxSpeed from serial.
+        updated = HIGH;               // Something changed.
         break;
-      case 'P':                                   // P -> Update Kp gain. Syntax: P[float]\n
-        Kp = Serial.parseFloat();                 // Read new Kp from serial.
-        updated = HIGH;                           // Something changed.
+      case 'P':                       // P -> Update Kp gain. Syntax: P[float]\n
+        Kp = Serial.parseFloat();     // Read new Kp from serial.
+        updated = HIGH;               // Something changed.
         break;
-      case 'I':                                   // I -> Update Ki gain. Syntax: I[float]\n
-        Ki = Serial.parseFloat();                 // Read new Ki from serial.
-        updated = HIGH;                           // Something changed.
+      case 'I':                       // I -> Update Ki gain. Syntax: I[float]\n
+        Ki = Serial.parseFloat();     // Read new Ki from serial.
+        updated = HIGH;               // Something changed.
         break;
-      case 'D':                                   // D -> Update Kd gain.  Syntax: D[float]\n
-        Kd = Serial.parseFloat();                 // Read new Kd from serial.
-        updated = HIGH;                           // Something changed.
+      case 'D':                       // D -> Update Kd gain.  Syntax: D[float]\n
+        Kd = Serial.parseFloat();     // Read new Kd from serial.
+        updated = HIGH;               // Something changed.
         break;
-      default:                                    // Default: Do nothing
+      case '-':                       // - -> Clear EEPROM.  Syntax: -\n
+        Serial.println("EEPROM WILL BE ERASED IN THE NEXT BOOT");
+        Serial.println("Press % to cancel");
+        clrEEPROM = HIGH;
+        EEPROM.put(32, clrEEPROM);
+        break;
+      case '+':                       // - -> Clear EEPROM.  Syntax: -\n
+        Serial.println("EEPROM WILL BE FILLED WITH DEFAULT VALUES IN THE NEXT BOOT");
+        Serial.println("Press % to cancel");
+        fillEEPROM = HIGH;
+        EEPROM.put(33, fillEEPROM);
+     
+        break;
+      case '%':                       // - -> Clear EEPROM.  Syntax: -\n
+        if (clrEEPROM == HIGH){
+          Serial.println("EEPROM ERASING CANCELLED");
+          clrEEPROM = LOW;
+          EEPROM.put(32, clrEEPROM);
+        }
+        if (fillEEPROM == HIGH){
+          Serial.println("LOADING OF DEFAULT VALUES CANCELLED");
+          fillEEPROM = LOW;
+          EEPROM.put(33, fillEEPROM);
+        }
+        break;
+      default:                        // Default: Do nothing
         break;
     }
     if (updated == HIGH){
-      SavePIDGainsToEEPROM ();                    // Save new gains & maxSpeed to EEPROM
+      SavePIDGainsToEEPROM ();        // Save new gains & maxSpeed to EEPROM
       SerialPrintPIDParameters(HIGH);
-      if (Serial.read() == '\n') {                // look for the newline. That's the end of your sentence
+      if (Serial.read() == '\n') {    // look for the newline. That's the end of your sentence
         return;
       }
     }

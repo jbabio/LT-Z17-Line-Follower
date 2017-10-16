@@ -15,7 +15,7 @@ void BootMode (){                                 // Normal boot restoring param
 void WaitForStart(){                              // Wait for the button to be pressed to exit setup() and start loop()
   ToggleLED (LOW, HIGH);                          // LED1 off: calibration ended/parameters restored | LED2 on: Robot ready to start.
   while(true){                                    // Infinite loop
-    UpdatePIDParameters ();                       // Check for updated PID gains & Speed through serial interface.
+    ReadSerialCommands ();                        // Check for commands through serial interface.
     if(CheckButton(button_1) == HIGH){            // Check if the button was pressed  
       ToggleLED (LOW, LOW);                       // Reset LEDs.
       break;                                      // Break the infinite loop & go to main loop()
@@ -35,6 +35,6 @@ void Pause(){                                     // Pause the bot and wait for 
   SerialPrintPIDParameters(LOW);                  // Print current PID Parameters.
   while (CheckButton(button_1) == LOW) {          // Wait for the resume button to be pressed.
     BlinkLED(11, 200);                            // Blink both LEDs simultaniously at 200ms to indicate it's in pause mode.
-    UpdatePIDParameters ();                       // Check for updated PID gains & Speed through serial interface.
+    ReadSerialCommands ();                        // Check for commands through serial interface.
   }
 }

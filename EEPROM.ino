@@ -1,10 +1,12 @@
-void ClearEEPROM (){
+void EraseEEPROM (){
   if (clrEEPROM == HIGH){           // Clears the EEPROM if commanded.
     for ( int i = 0 ; i < EEPROM.length() ; i++ ){
       EEPROM.write(i, 0);
       BlinkLED(22, 50);
     }
     ToggleLED (LOW, LOW);           // turn the LEDs off when we're done
+    clrEEPROM = LOW;                //Set clrEEPROM to LOW to avoid erasing it in the next boot.
+    SaveStartUpFlagsToEEPROM();
   }
 }
 
@@ -18,6 +20,8 @@ void ResetPIDGains(){
     EEPROM.put(4, default_Kp);
     EEPROM.put(8, default_Kd);
     EEPROM.put(12, default_Ki);
+    fillEEPROM = LOW;                //Set fillEEPROM to LOW to avoid filling it in the next boot.
+    SaveStartUpFlagsToEEPROM();
   }
 }
 
@@ -50,7 +54,7 @@ void ReadPIDGainsFromEEPROM (){
 }
 
 void ReadQTRCalibrationFromEEPROM (){
-  int a = 16;                                         //Start memory address, From 0 to 15 are used by PID gains.
+  int a = 16;                                         //Start memory address, From 0 to 15 are used by PID gains and from 16 to 30 by QTR calibration
   qtrrc.calibrate();
   for (int i = 0; i < NUM_SENSORS; i++)
   {
@@ -63,4 +67,14 @@ void ReadQTRCalibrationFromEEPROM (){
     a = a + 2;                                        // "a" Keeps increasing with each value readed (each int takes 2 Bytes of EEPROM)
   }
   ShowCalibration(HIGH);
+}
+
+void SaveStartUpFlagsToEEPROM (){
+  EEPROM.put(32, clrEEPROM);                                  // 1 byte reserved cause it's a boolean
+  EEPROM.put(33, fillEEPROM);                                  // 1 byte reserved cause it's a boolean
+}
+
+void ReadStartUpFlagsFromEEPROM (){
+  EEPROM.get(32, clrEEPROM);                                  // 1 byte reserved cause it's a boolean
+  EEPROM.get(33, fillEEPROM);                                  // 1 byte reserved cause it's a boolean
 }
